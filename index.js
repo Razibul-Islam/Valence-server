@@ -16,13 +16,34 @@ const client = new MongoClient(uri, {
 });
 
 async function run() {
-    try {
-        
-    } finally {
-        
-    }
+  try {
+    const usersCollection = client.db("Valence").collection("users");
+    const PostCollection = client.db("Valence").collection("Posts");
+    
+    // Post a user
+    app.post("/users", async (req, res) => {
+      const query = req.body;
+      const result = await usersCollection.insertOne(query);
+      res.send(result);
+    });
+
+    // Post a Post
+    app.post("/posts", async (req, res) => {
+      const query = req.body;
+      const result = await PostCollection.insertOne(query);
+      res.send(result);
+    });
+
+    // Get all Post
+    app.get("/posts", async (req, res) => {
+      const query = {};
+      const result = await PostCollection.find(query).toArray();
+      res.send(result);
+    });
+  } finally {
+  }
 }
-run().catch((err)=>console.log(err))
+run().catch((err) => console.log(err));
 
 app.get("/", (req, res) => {
   res.send("Valence is running");
