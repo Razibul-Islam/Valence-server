@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const { query } = require("express");
 const app = express();
 require("dotenv").config();
 const port = process.env.PORT || 5000;
@@ -19,13 +20,40 @@ async function run() {
   try {
     const usersCollection = client.db("Valence").collection("users");
     const PostCollection = client.db("Valence").collection("Posts");
-    
+    const commentCollection = client.db("Valence").collection("comments");
+
+    // USER
+
     // Post a user
     app.post("/users", async (req, res) => {
       const query = req.body;
       const result = await usersCollection.insertOne(query);
       res.send(result);
     });
+
+    // PUT -- Update a User
+    app.put("/users", async (req, res) => {
+      const userEmail = req.body.userEmail;
+      const data = req.body;
+      const query = { userEmail: userEmail };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          userName: data.userName,
+          userEmail: data.userEmail,
+          userPhoto: data.userPhoto,
+          university: data.university,
+          address: data.address,
+          Phone: data.Phone,
+          Birthday: data.Birthday,
+          Gender: data.Gender,
+        },
+      };
+      const result = await usersCollection.updateOne(query, updateDoc, options);
+      res.send(result);
+    });
+
+    // POST
 
     // Post a Post
     app.post("/posts", async (req, res) => {
@@ -38,6 +66,13 @@ async function run() {
     app.get("/posts", async (req, res) => {
       const query = {};
       const result = await PostCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // Get post comment update
+    app.post("/comments", async (req, res) => {
+      const query = req.body;
+      const result = await commentCollection.insertOne(query);
       res.send(result);
     });
   } finally {
