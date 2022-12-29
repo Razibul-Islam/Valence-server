@@ -31,6 +31,15 @@ async function run() {
       res.send(result);
     });
 
+    // Get user Profile
+    app.get("/user", async (req, res) => {
+      const userEmail = req.query.userEmail;
+      const query = { userEmail: userEmail };
+      console.log(query);
+      const result = await usersCollection.findOne(query);
+      res.send(result);
+    });
+
     // PUT -- Update a User
     app.put("/users", async (req, res) => {
       const userEmail = req.body.userEmail;
