@@ -35,8 +35,39 @@ async function run() {
     app.get("/user", async (req, res) => {
       const userEmail = req.query.userEmail;
       const query = { userEmail: userEmail };
-      console.log(query);
+      // console.log(query);
       const result = await usersCollection.findOne(query);
+      res.send(result);
+    });
+
+    // Update a User get
+    app.get("/user/:id", async (req, res) => {
+      const id = req.params.id;
+      // console.log(id);
+      const query = { _id: ObjectId(id) };
+      const result = await usersCollection.findOne(query);
+      res.send(result);
+    });
+    // Update a User Put
+    app.put("/user", async (req, res) => {
+      const userEmail = req.body.userEmail;
+      const data = req.body;
+      console.log(data);
+      const query = { userEmail: userEmail };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          userName: data.userName,
+          userEmail: data.userEmail,
+          userPhoto: data.userPhoto,
+          university: data.university,
+          address: data.address,
+          Phone: data.Phone,
+          Birthday: data.Birthday,
+          Gender: data.Gender,
+        },
+      };
+      const result = await usersCollection.updateOne(query, updateDoc, options);
       res.send(result);
     });
 
