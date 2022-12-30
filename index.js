@@ -115,6 +115,24 @@ async function run() {
       const result = await commentCollection.insertOne(query);
       res.send(result);
     });
+
+    // Get one post
+    app.get("/post/:id", async (req, res) => {
+      const id = req.params.id;
+      // console.log(id);
+      const query = { _id: ObjectId(id) };
+      const result = await PostCollection.findOne(query);
+      res.send(result);
+    });
+
+    // get all Comments for one post
+    app.get("/comments/:id", async (req, res) => {
+      const id = req.params.id;
+      // console.log(id);
+      const query = { postId: id };
+      const result = await commentCollection.find(query).toArray();
+      res.send(result);
+    });
   } finally {
   }
 }
