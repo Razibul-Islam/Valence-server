@@ -52,29 +52,7 @@ async function run() {
     app.put("/user", async (req, res) => {
       const userEmail = req.body.userEmail;
       const data = req.body;
-      console.log(data);
-      const query = { userEmail: userEmail };
-      const options = { upsert: true };
-      const updateDoc = {
-        $set: {
-          userName: data.userName,
-          userEmail: data.userEmail,
-          userPhoto: data.userPhoto,
-          university: data.university,
-          address: data.address,
-          Phone: data.Phone,
-          Birthday: data.Birthday,
-          Gender: data.Gender,
-        },
-      };
-      const result = await usersCollection.updateOne(query, updateDoc, options);
-      res.send(result);
-    });
-
-    // PUT -- Update a User
-    app.put("/users", async (req, res) => {
-      const userEmail = req.body.userEmail;
-      const data = req.body;
+      // console.log(data);
       const query = { userEmail: userEmail };
       const options = { upsert: true };
       const updateDoc = {
@@ -105,7 +83,9 @@ async function run() {
     // Get all Post
     app.get("/posts", async (req, res) => {
       const query = {};
-      const result = await PostCollection.find(query).toArray();
+      const result = await PostCollection.find(query)
+        .sort({ _id: -1 })
+        .toArray();
       res.send(result);
     });
 
@@ -130,8 +110,75 @@ async function run() {
       const id = req.params.id;
       // console.log(id);
       const query = { postId: id };
-      const result = await commentCollection.find(query).toArray();
+      const result = await commentCollection
+        .find(query)
+        .sort({ _id: -1 })
+        .toArray();
       res.send(result);
+    });
+
+    // POST route for liking a post
+    app.post("/like/:id", (req, res) => {
+      // Retrieve the ID of the post to like from the request parameters
+      const id = req.params.id;
+
+      // Find the post in the database
+      PostCollection.findOne({ _id: ObjectId(id) }, (error, post) => {
+        if (error) {
+          console.log(error);
+          res.send(error);
+        } else if (!post) {
+          // If the post doesn't exist, return a 404 error
+          res.sendStatus(404);
+        } else {
+          // Update the likeCount field of the post by incrementing it by 1
+          PostCollection.updateOne(
+            { _id: ObjectId(id) },
+            { $inc: { likeCount: 1 } },
+            (error) => {
+              if (error) {
+                console.log(error);
+                res.send(error);
+              } else {
+                // Send a response to the client to indicate that the like was successful
+                res.sendStatus(200);
+              }
+            }
+          );
+        }
+      });
+    });
+
+    // POST route for disliking a post
+    app.post("/dislike/:id", (req, res) => {
+      // Retrieve the ID of the post to dislike from the request parameters
+      const id = req.params.id;
+
+      // Find the post in the database
+      PostCollection.findOne({ _id: ObjectId(id) }, (error, post) => {
+        if (error) {
+          console.log(error);
+          res.send(error);
+        } else if (!post) {
+          // If the post doesn't exist, return a 404 error
+          res.sendStatus(404);
+        } else {
+          // Update the likeCount field of the post by decrementing it by 1
+          PostCollection.updateOne(
+            { _id: ObjectId(id) },
+            { $inc: { likeCount: -1 } },
+            (error) => {
+              if (error) {
+                console.log(error);
+                res.send(error);
+              } else {
+                // Send a response to the client to indicate that the dislike was successful
+                res.sendStatus(200);
+              }
+            }
+          );
+        }
+      });
     });
   } finally {
   }
